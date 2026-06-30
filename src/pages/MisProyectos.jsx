@@ -8,22 +8,27 @@ export default function MisProyectos() {
   const [isModalUnirseOpen, setIsModalUnirseOpen] = useState(false);
   const [isModalCrearOpen, setIsModalCrearOpen] = useState(false);
 
-  useEffect(() => {
-    cargarDatos();
-  }, []);
-
+  // 1. PRIMERO declaramos la función (movida arriba)
   const cargarDatos = async () => {
     const data = await obtenerProyectos();
     setProyectos(data);
   };
+
+  // 2. LUEGO usamos el useEffect (ahora React ya sabe qué es cargarDatos)
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    cargarDatos();
+  }, []);
 
   const handleUnirse = async (codigo) => {
     try {
       await unirseProyecto(codigo);
       alert("¡Te uniste con éxito!");
       setIsModalUnirseOpen(false);
-      cargarDatos();
+      cargarDatos(); 
     } catch (error) {
+      // 3. Imprimimos el error en consola para usar la variable
+      console.error("Error detallado al unirse:", error);
       alert("Código incorrecto o error al unirse.");
     }
   };
@@ -33,8 +38,10 @@ export default function MisProyectos() {
       await crearProyecto(datosProyecto);
       alert("¡Proyecto creado con éxito! Eres el Líder.");
       setIsModalCrearOpen(false);
-      cargarDatos();
+      cargarDatos(); 
     } catch (error) {
+      // 4. Imprimimos el error en consola para usar la variable
+      console.error("Error detallado al crear:", error);
       alert("Error al intentar crear el proyecto.");
     }
   };
@@ -63,7 +70,6 @@ export default function MisProyectos() {
             <p style={styles.pageSubtitle}>Gestiona tus proyectos y equipos de estudio</p>
           </div>
           
-          {/* NUEVA ZONA DE BOTONES */}
           <div style={{ display: 'flex', gap: '10px' }}>
             <button style={styles.secondaryButton} onClick={() => setIsModalUnirseOpen(true)}>
               🔗 Unirse a Proyecto
@@ -84,10 +90,12 @@ export default function MisProyectos() {
             </div>
           ) : (
             proyectos.map((proy, index) => (
-              <div key={index} style={styles.projectCard}>
+              <div key={proy.idProyecto || index} style={styles.projectCard}>
                 <div style={styles.cardHeader}>
-                  <div style={styles.projectIcon}>{proy.nombre ? proy.nombre.charAt(0).toUpperCase() : 'P'}</div>
-                  <span style={styles.statusBadge}>Activo</span>
+                  <div style={styles.projectIcon}>
+                    {proy.nombre ? proy.nombre.charAt(0).toUpperCase() : 'P'}
+                  </div>
+                  <span style={styles.statusBadge}>{proy.estado || "Activo"}</span>
                 </div>
                 <h3 style={styles.cardTitle}>{proy.nombre || "Proyecto sin nombre"}</h3>
                 <p style={styles.cardDescription}>{proy.descripcion || "Sin descripción asignada."}</p>
@@ -115,7 +123,6 @@ export default function MisProyectos() {
   );
 }
 
-// DICCIONARIO DE ESTILOS (El mismo de antes con pequeños ajustes)
 const styles = {
   layout: { display: 'flex', minHeight: '100vh', backgroundColor: '#F4F5F7', fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif" },
   sidebar: { width: '240px', backgroundColor: '#FFFFFF', borderRight: '1px solid #DFE1E6', padding: '20px 10px', display: 'flex', flexDirection: 'column' },

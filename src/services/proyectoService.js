@@ -27,9 +27,6 @@ export const unirseProyecto = async (codigoInvitacion) => {
   }
 };
 
-// ... código anterior (obtenerProyectos y unirseProyecto)
-
-// NUEVA FUNCIÓN: Crear un proyecto nuevo
 export const crearProyecto = async (datosProyecto) => {
   try {
     // Mandamos el nombre y descripción. El backend se encargará de generar el código.
