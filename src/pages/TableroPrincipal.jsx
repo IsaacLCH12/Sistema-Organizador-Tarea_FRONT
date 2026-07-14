@@ -4,8 +4,8 @@ import Navbar from '../components/Navbar';
 import ColumnaKanban from '../components/ColumnaKanban';
 import { useAuth } from '../context/AuthContext';
 import { listarTareas, crearTarea, cambiarEstadoTarea } from '../services/tareaService';
-import { listarMiembros } from '../services/proyectoService';
-import { Plus, Filter, Search, Info, Users, PieChart } from 'lucide-react';
+import { listarMiembros, eliminarMiembro } from '../services/proyectoService';
+import { Plus, Filter, Search, Info, Users, PieChart, UserMinus } from 'lucide-react';
 import ModalAlerta from '../components/ModalAlerta';
 import DetalleTarea from '../components/DetalleTarea';
 
@@ -74,7 +74,6 @@ export default function TableroPrincipal() {
       setErrorModal('El título de la tarea debe tener al menos 3 caracteres.');
       return;
     }
-
     try {
       const puntos = puntosHistoria ? parseInt(puntosHistoria) : null;
       await crearTarea(parseInt(idProyecto), titulo, descripcion, etiqueta, prioridad, tipoIssue, fechaLimite || null, puntos);
@@ -84,6 +83,18 @@ export default function TableroPrincipal() {
       cargarDatos();
     } catch (err) {
       setErrorModal(err.response?.data?.detail || 'Error al crear tarea: Verifica que los datos sean correctos.');
+    }
+  };
+
+  const handleExpulsarMiembro = async (idMiembro) => {
+    if (window.confirm('¿Estás seguro de que quieres expulsar a este miembro? Perderá todas sus tareas asignadas.')) {
+      try {
+        await eliminarMiembro(idProyecto, idMiembro);
+        cargarDatos();
+      } catch (error) {
+        console.error(error);
+        setErrorModal(error.response?.data?.detail || "Error al expulsar al miembro");
+      }
     }
   };
 
@@ -360,6 +371,7 @@ export default function TableroPrincipal() {
                       <th style={{ padding: '12px', fontWeight: '500' }}>Estado</th>
                       <th style={{ padding: '12px', fontWeight: '500' }}>Permisos</th>
                       <th style={{ padding: '12px', fontWeight: '500' }}>Rol Funcional</th>
+                      {esLider && <th style={{ padding: '12px', fontWeight: '500' }}>Acciones</th>}
                     </tr>
                   </thead>
                   <tbody>
@@ -393,6 +405,34 @@ export default function TableroPrincipal() {
                           )}
                         </td>
                         <td style={{ padding: '12px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{m.rolFuncional}</td>
+                        {esLider && (
+                          <td style={{ padding: '12px', textAlign: 'center' }}>
+                            {m.idUsuario !== usuarioActual.idUsuario && m.rolPermiso !== 'Líder / Creador' && (
+                              <button 
+                                onClick={() => handleExpulsarMiembro(m.idMiembroEquipo)}
+                                style={{
+                                  background: 'rgba(239,68,68,0.1)',
+                                  border: '1px solid rgba(239,68,68,0.3)',
+                                  color: '#ef4444',
+                                  cursor: 'pointer',
+                                  padding: '6px 10px',
+                                  borderRadius: '8px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '5px',
+                                  transition: 'all 0.2s ease',
+                                  fontSize: '0.75rem',
+                                  fontWeight: '600'
+                                }}
+                                onMouseEnter={e => { e.currentTarget.style.background='rgba(239,68,68,0.25)'; e.currentTarget.style.transform='scale(1.05)'; }}
+                                onMouseLeave={e => { e.currentTarget.style.background='rgba(239,68,68,0.1)'; e.currentTarget.style.transform='scale(1)'; }}
+                                title="Expulsar Miembro"
+                              >
+                                <UserMinus size={14} /> Expulsar
+                              </button>
+                            )}
+                          </td>
+                        )}
                       </tr>
                     ))}
                   </tbody>

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { User, Settings, CheckCircle, Clock, List, Save, Eye, EyeOff } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { obtenerPerfil, actualizarPerfil, obtenerMisTareas } from '../services/authService';
+import { listarProyectos } from '../services/proyectoService';
 
 const Perfil = () => {
   // Estado para la información del perfil del usuario
@@ -16,6 +17,7 @@ const Perfil = () => {
 
   // Estado para la lista de tareas del usuario
   const [misTareas, setMisTareas] = useState([]);
+  const [proyectosList, setProyectosList] = useState([]);
   
   // Estado de carga y errores
   const [cargando, setCargando] = useState(true);
@@ -42,6 +44,10 @@ const Perfil = () => {
         // Cargar las tareas asignadas al usuario
         const datosTareas = await obtenerMisTareas();
         setMisTareas(datosTareas);
+
+        // Cargar proyectos para mapear nombres
+        const datosProyectos = await listarProyectos();
+        setProyectosList(datosProyectos);
       } catch (err) {
         setError('Ocurrió un error al cargar la información.');
         console.error(err);
@@ -243,7 +249,7 @@ const Perfil = () => {
                         textTransform: 'uppercase',
                         letterSpacing: '1px'
                       }}>
-                        📌 Proyecto #{idProj}
+                        📌 {proyectosList.find(p => p.idProyecto === parseInt(idProj))?.nombre || `PROYECTO #${idProj}`}
                       </h4>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         {tareasDelProyecto.map((tarea) => (

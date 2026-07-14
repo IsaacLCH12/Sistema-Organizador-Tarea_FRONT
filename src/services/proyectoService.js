@@ -28,3 +28,8 @@ export const eliminarProyecto = async (idProyecto) => {
     const response = await api.delete(`/proyectos/${idProyecto}`);
     return response.data;
 };
+
+export const eliminarMiembro = async (idProyecto, idMiembroEquipo) => {
+    const response = await api.delete(`/proyectos/${idProyecto}/miembros/${idMiembroEquipo}`);
+    return response.data;
+};
